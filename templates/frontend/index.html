@@ -20,10 +20,12 @@
           <h3>Step 1</h3>
           <p>Enter name of your city</p>
           <p>Example: "Milan"</p>
-            <div class="form-group">
-                <input type="text" class="form-control" id="city" placeholder="Enter city name here">
-          </div>
+          <form action="" method="post">{% csrf_token %}
+
+                <input type="text" class="form-control form-group" name="name" placeholder="Enter city name here">
+
           <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
         </div>
         <div class="col-sm-6">
           <h3>Step 2</h3>
