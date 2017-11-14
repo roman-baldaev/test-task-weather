@@ -13,4 +13,4 @@ class HistoryForm(forms.ModelForm):
 
     class Meta:
         model = History
-        exclude = ['date', 'value']
+        exclude = []

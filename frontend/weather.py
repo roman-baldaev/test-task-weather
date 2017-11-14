@@ -1,5 +1,6 @@
-from urllib import request, parse
+from urllib import request
 from bs4 import BeautifulSoup
+import requests
 
 
 def yandex(city):
@@ -15,7 +16,7 @@ def yandex(city):
         answer = BeautifulSoup(request.urlopen(req))
         temp_value = str(answer.find('span', 'temp__value')).split('>')[1].split('<')[0]
 
-        if (temp_value[0] == '-') or (ord(temp_value[0]) == 8722):
+        if (temp_value[0] == '-') or (ord(temp_value[0]) == 8722): #проверяем отрицательное знач-е
             temp = float(temp_value[1:]) * (-1)
         else:
             temp = float(temp_value)
@@ -24,4 +25,16 @@ def yandex(city):
 
     except Exception as connection_error:
         return connection_error
-print(yandex('Tomsk'))
+
+
+def open_weather_map (city):
+    try:
+        url = 'http://api.openweathermap.org/data/2.5/weather?q={}&appid=c7365fbce4cdaa0eed49c8adb6828336'.format(city)
+        req = requests.get(url)
+
+        return req.json()['main']['temp']
+
+    except Exception as connection_error:
+        return connection_error
+
+#print(open_weather_map('new york'))
