@@ -24,4 +24,4 @@ class History(models.Model):
     created = models.DateTimeField(auto_now_add = True, auto_now = False)
 
     def __str__(self):
-        return str(self.city) + str(self.values) + str(self.date)
+        return str(self.city) + str(self.values) + str(self.created)
