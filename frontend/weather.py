@@ -5,7 +5,7 @@ import requests
 
 
 def yandex(city):
-    try:
+
 
         myheader = {
                     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 ' \
@@ -15,7 +15,8 @@ def yandex(city):
         url = 'https://yandex.ru/pogoda/{}'.format(city)
         req = request.Request(url, headers = myheader)
         answer = BeautifulSoup(request.urlopen(req))
-        temp_value = str(answer.find('span', 'temp__value')).split('>')[1].split('<')[0]
+        print(str(answer))
+        temp_value = str(answer.find('temp__value')).split('>')[1].split('<')[0]
 
         if (temp_value[0] == '-') or (ord(temp_value[0]) == 8722): #проверяем отрицательное знач-е
             temp = float(temp_value[1:]) * (-1)
@@ -23,9 +24,6 @@ def yandex(city):
             temp = float(temp_value)
         return temp
 
-
-    except Exception as connection_error:
-        return connection_error
 
 
 def open_weather_map (city):
@@ -39,3 +37,4 @@ def open_weather_map (city):
         return connection_error
 
 #print(open_weather_map('new york'))
+print(yandex('Moscow'))
