@@ -37,4 +37,3 @@ def open_weather_map (city):
         return connection_error
 
 #print(open_weather_map('new york'))
-print(yandex('Moscow'))

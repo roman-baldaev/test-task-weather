@@ -105,9 +105,10 @@ def auto_update_function(cities):
                 json_data = json.dumps(data)
                 cursor.execute(
                     "INSERT INTO frontend_history (city_id, temp_values, created) \
-                       VALUES ({},'{}', '{}');".format(city_id, json_data, datetime.datetime.now()))
+                       VALUES ({},'{}', '{}');".format(city_id, json_data, datetime.datetime.now(utc_timezone)))
                 connect.commit()
-
+                response = HttpResponse(status=200, content_type='text/html', charset='utf-8')
+                return response
             # cursor.execute('SELECT created FROM frontend_history WHERE city_id = 1;')
             # time = cursor.fetchall()
             #
@@ -130,5 +131,5 @@ def auto_update_function(cities):
 
     connect.close()
 if __name__ == '__main__':
-    print(yandex('Moscow'))
-    # print(auto_update_function(['Moscow', 'Novosibirsk', 'Washington', 'Samara', 'Tomsk']))
+    # print(yandex('Moscow'))
+    print(auto_update_function(['Moscow', 'Novosibirsk', 'Washington', 'Samara', 'Tomsk']))
