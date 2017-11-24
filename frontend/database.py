@@ -20,7 +20,8 @@ def yandex(city):
         answer = BeautifulSoup(request.urlopen(req))
         temp_value = str(answer.find('span', 'temp__value')).split('>')[1].split('<')[0]
 
-        if (temp_value[0] == '-') or (ord(temp_value[0]) == 8722): #проверяем отрицательное знач-е
+        # проверяем отрицательное знач-е
+        if (temp_value[0] == '-') or (ord(temp_value[0]) == 8722):
             temp = float(temp_value[1:]) * (-1)
         else:
             temp = float(temp_value)
@@ -33,8 +34,8 @@ def open_weather_map(city):
     try:
         url = 'http://api.openweathermap.org/data/2.5/weather?q={}&appid=c7365fbce4cdaa0eed49c8adb6828336'.format(city)
         req = requests.get(url)
-
-        return [req.json()['main']['temp'], url]
+        temperature = float(req.json()['main']['temp']) - 273.15
+        return [round(temperature, 1), url]
 
     except Exception as connection_error:
         return [connection_error, url]
@@ -45,9 +46,7 @@ def auto_update_function(cities):
         Script for autoupdate of weather
 
     """
-
     try:
-
             connect = psycopg2.connect(database = 'django_test', user = 'roman',
                                        host = 'localhost', password = 'admin')
             cursor = connect.cursor()
@@ -70,7 +69,7 @@ def auto_update_function(cities):
                 open_weather_value = open_weather_map(cities[i])
 
                 # error in yandex source
-                if (type(yandex_value[0]) == error.HTTPError):
+                if type(yandex_value[0]) == error.HTTPError:
                     data = {
                         'Error': 'Error in auto update function.',
                         'Time': str(datetime.datetime.now(utc_timezone)),
@@ -105,10 +104,12 @@ def auto_update_function(cities):
                 json_data = json.dumps(data)
                 cursor.execute(
                     "INSERT INTO frontend_history (city_id, temp_values, created) \
-                       VALUES ({},'{}', '{}');".format(city_id, json_data, datetime.datetime.now(utc_timezone)))
+                       VALUES ({},'{}', '{}');".format(city_id, json_data,
+                                                       datetime.datetime.now(utc_timezone)))
                 connect.commit()
-                response = HttpResponse(status=200, content_type='text/html', charset='utf-8')
-                return response
+            connect.close()
+            response = HttpResponse(status=200, content_type='text/html', charset='utf-8')
+            return response
             # cursor.execute('SELECT created FROM frontend_history WHERE city_id = 1;')
             # time = cursor.fetchall()
             #
@@ -128,8 +129,43 @@ def auto_update_function(cities):
     except Exception as connection_db_error:
         print('Error auto_update function: {}'.format(connection_db_error))
         return connection_db_error
-
     connect.close()
+
+
+def last_update_temperature(city):
+    """A script to retrieve data from the last update.
+
+    """
+    try:
+        #connect to DB
+        utc_timezone = pytz.timezone('UTC')
+        connect = psycopg2.connect(database='django_test', user='roman',
+                                   host='localhost', password='admin')
+        cursor = connect.cursor()
+        #get city id
+        cursor.execute("SELECT id FROM frontend_city WHERE city_name = '{}';".format(city))
+        city_id = cursor.fetchall()
+        city_id = city_id[0][0]
+
+        #get last update
+        cursor.execute(
+            "SELECT temp_values, created FROM frontend_history \
+              WHERE city_id = {} ORDER BY created;".format(city_id)
+        )
+        last_update = cursor.fetchall()[-1]
+        return last_update
+
+    except Exception as connection_db_error:
+        print('Error last_update_temperature function: {}'.format(connection_db_error))
+        return connection_db_error
+    connect.close()
+
+
 if __name__ == '__main__':
+    utc_timezone = pytz.timezone('UTC')
     # print(yandex('Moscow'))
-    print(auto_update_function(['Moscow', 'Novosibirsk', 'Washington', 'Samara', 'Tomsk']))
+    # print(auto_update_function(['Moscow', 'Novosibirsk', 'Washington', 'Samara', 'Tomsk']))
+    print(last_update_temperature('Tomsk'))
+    # print (last_update_temperature('Tomsk')[1](utc_timezone))
+    print(last_update_temperature('Tomsk')[1].astimezone(utc_timezone))
+    # print(last_update_temperature('Tomsk')[1](utc_timezone))
