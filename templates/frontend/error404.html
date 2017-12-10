@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Error 404</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/new-index.css' %}">
+
+</head>
+<body>
+
+<section class="page" id="second-page">
+    <div class="main" style="background-image: url({% static 'image/background2.jpg' %}); text-align: center;
+    color: white; padding-top: 10vh;">
+        <h1 style="font-size: 100px;">Error 404</h1>
+        <h2>City "{{city}}" not found, please repeat entet</h2>
+        <a href="http://localhost:8000/index" id="search-but" class="btn">Back</a>
+    </div>
+</section>
+</body>
+
+</html>

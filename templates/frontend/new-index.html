@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Not afraid</title>
+    {% load static %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/new-index.css' %}">
+<link href="https://fonts.googleapis.com/css?family=Bungee+Inline|Julius+Sans+One|Russo+One|Special+Elite" rel="stylesheet">
+
+    
+
+
+</head>
+<body>
+
+<section class="page" id="second-page">
+    <div class="main" style="background-image: url({% static 'image/background2.jpg' %}); text-align: center;
+    color: white; padding-top: 10vh;">
+        <h1 style="font-size: 50px;">Enter your city here:</h1>
+         <form action="" method="GET" style="margin-top: 5vh; font-family: Arial;">{% csrf_token %}
+             <input type="text" class="form-control form-group" name="city_name" placeholder="City name" style="width: 300px;
+             margin: 0 auto;">
+             <button type="submit" id="search-but" class="btn">Submit</button>
+         </form>
+        <div class="results">
+            <div class="row">
+              <div class="col-sm-6">
+                  <p>{{ yandex }}</p>
+                  <p>{{ openweather }}</p>
+              </div>
+              <div class="col-sm-6">
+                  <p>{{ average }}</p>
+                  <p>{{ last_update_time }}</p>
+              </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+
+</html>

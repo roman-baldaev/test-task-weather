@@ -9,6 +9,14 @@ import json
 
 
 def yandex(city):
+    """Function for obtaining temperature from Yandex.
+
+        Accepts the name of the city (city).
+        The temperature is extracted directly from the HTML page.
+        Return a list with two values.
+        In case of success - value of temperature and URL, otherwise - error and URL.
+
+    """
     try:
         myheader = {
                     'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 ' \
@@ -31,9 +39,21 @@ def yandex(city):
 
 
 def open_weather_map(city):
+    """Function for obtaining temperature from Yandex.
+
+        Accepts the name of the city (city)
+        The temperature is extracted from the JSON file obtained with OpenWeatherMap API.
+
+        Return a list with two values.
+        In case of success - value of temperature and URL, otherwise - error and URL.
+
+    """
     try:
+        #connect to OpenWeatherMap
         url = 'http://api.openweathermap.org/data/2.5/weather?q={}&appid=c7365fbce4cdaa0eed49c8adb6828336'.format(city)
         req = requests.get(url)
+
+        #convert to degrees celsius
         temperature = float(req.json()['main']['temp']) - 273.15
         return [round(temperature, 1), url]
 
@@ -42,8 +62,14 @@ def open_weather_map(city):
 
 
 def auto_update_function(cities):
-    """
-        Script for autoupdate of weather
+    """Auto-update weather function
+        The function takes a list of the cities to update.
+
+        If the error connecting to sources - an error with
+        a status of 500 and JSON with the cause of the error and URL.
+
+        If the connection is successful, it enters the
+        data into the database and returns an empty response with code 200.
 
     """
     try:
@@ -76,7 +102,7 @@ def auto_update_function(cities):
                         'Reason': '{}. Please, check url: {}'.format(yandex_value[0], yandex_value[1])
                     }
                     json_data_error = json.dumps(data)
-                    response = HttpResponse(json_data_error, status=500, content_type='json', charset='utf-8')
+                    response = HttpResponse(json_data_error, status=500, content_type='application/json', charset='utf-8')
                     return response
 
                 # error in open weather source
@@ -87,7 +113,7 @@ def auto_update_function(cities):
                         'Reason': '{}. Please, check url: {}'.format(open_weather_value[0], open_weather_value[1])
                     }
                     json_data_error = json.dumps(data)
-                    response = HttpResponse(json_data_error, status=500, content_type='json', charset='utf-8')
+                    response = HttpResponse(json_data_error, status=500, content_type='application/json', charset='utf-8')
                     return response
 
                 #If the city has not been checked before
@@ -110,62 +136,19 @@ def auto_update_function(cities):
             connect.close()
             response = HttpResponse(status=200, content_type='text/html', charset='utf-8')
             return response
-            # cursor.execute('SELECT created FROM frontend_history WHERE city_id = 1;')
-            # time = cursor.fetchall()
-            #
-            # times = []
-            # for i in range(len(time)):
-            #
-            #     add = time[i][0]
-            #     times.append(add)
-            #
-            #
-            # print(times[0])
-            # print ( datetime.datetime.now(utc) - times[0])
-            #
-            # print(datetime.datetime.now(utc) - times[0])
-            # print(datetime.datetime.now(utc))
-            # print(datetime.datetime.now(utc).replace(hour=datetime.datetime.now(utc).hour+1))
-    except Exception as connection_db_error:
-        print('Error auto_update function: {}'.format(connection_db_error))
-        return connection_db_error
-    connect.close()
-
-
-def last_update_temperature(city):
-    """A script to retrieve data from the last update.
-
-    """
-    try:
-        #connect to DB
-        utc_timezone = pytz.timezone('UTC')
-        connect = psycopg2.connect(database='django_test', user='roman',
-                                   host='localhost', password='admin')
-        cursor = connect.cursor()
-        #get city id
-        cursor.execute("SELECT id FROM frontend_city WHERE city_name = '{}';".format(city))
-        city_id = cursor.fetchall()
-        city_id = city_id[0][0]
-
-        #get last update
-        cursor.execute(
-            "SELECT temp_values, created FROM frontend_history \
-              WHERE city_id = {} ORDER BY created;".format(city_id)
-        )
-        last_update = cursor.fetchall()[-1]
-        return last_update
 
     except Exception as connection_db_error:
-        print('Error last_update_temperature function: {}'.format(connection_db_error))
-        return connection_db_error
+        data = {
+            'Error': 'Error in auto update function.',
+            'Time': str(datetime.datetime.now(utc_timezone)),
+            'Reason': '{}'.format(connection_db_error)
+        }
+        json_data_error = json.dumps(data)
+        response = HttpResponse(json_data_error, status=500, content_type='application/json', charset='utf-8')
+        return response
     connect.close()
 
 
 if __name__ == '__main__':
-    utc_timezone = pytz.timezone('UTC')
-    # print(yandex('Moscow'))
-    # print(auto_update_function(['Moscow', 'Novosibirsk', 'Washington', 'Samara', 'Tomsk']))
-    print(last_update_temperature('Tomsk'))
-    # print (last_update_temperature('Tomsk')[1](utc_timezone))
-    print(last_update_temperature('Tomsk')[1].astimezone(utc_timezone))
-    # print(last_update_temperature('Tomsk')[1](utc_timezone))
+    auto_update_function(['Tomsk'])
+    pass
